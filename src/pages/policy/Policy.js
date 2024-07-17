@@ -7,13 +7,13 @@ import { Card, Stack, Button, Container, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { DataGrid, GridToolbar, GridToolbarContainer } from '@mui/x-data-grid';
 import { DeleteOutline } from '@mui/icons-material';
-import Iconify from '../../components/iconify';
-// sections
 // mock
 import AddPolicy from './Add'
 import DeleteModel from '../../components/Deletemodle'
 import { apiget, deleteManyApi } from '../../service/api';
 import TableStyle from '../../components/TableStyle';
+import React from 'react';
+import { Icon } from '@iconify/react';
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -85,13 +85,18 @@ const Policy = () => {
       }
     },
     {
+      field: "policyName",
+      headerName: "Policy Name",
+      flex: 1,
+    },
+    {
       field: "policyType",
       headerName: "Policy Type",
       flex: 1,
     },
     {
       field: "policyStartDate",
-      headerName: "Policy start date",
+      headerName: "Policy Start Date",
       flex: 1,
       valueFormatter: (params) => {
         const date = new Date(params.value);
@@ -100,7 +105,7 @@ const Policy = () => {
     },
     {
       field: "policyEndDate",
-      headerName: "Policy end date",
+      headerName: "Policy End Date",
       flex: 1,
       valueFormatter: (params) => {
         const date = new Date(params.value);
@@ -109,15 +114,16 @@ const Policy = () => {
     },
     {
       field: "policyStatus",
-      headerName: "Policy status",
+      headerName: "Policy Status",
       flex: 1,
     }
   ];
 
   const fetchdata = async () => {
-    const result = await apiget(userRole === "admin" ? `policy/list` : `policy/list/?createdBy=${userid}`)
+    const result = await apiget(userRole === "ADMIN" ? `policies` : `policies?createdBy=${userid}`)
+    console.log(result);
     if (result && result.status === 200) {
-      setPolicyList(result?.data?.result)
+      setPolicyList(result?.data)
     }
   }
 
@@ -127,34 +133,33 @@ const Policy = () => {
 
   return (
     <>
-      {/* Add Lead Model */}
+      {/* Add Policy Model */}
       <AddPolicy open={openAdd} handleClose={handleCloseAdd} setUserAction={setUserAction} />
 
       <Container>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-            <Typography variant="h4" >
-              Policy
-            </Typography>
-            <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleOpenAdd}>
-              New Policy
-            </Button>
-          </Stack>
-          <TableStyle>
-            <Box width="100%">
-              <Card style={{ height: "600px", paddingTop: "15px" }}>
-                <DataGrid
-                  rows={policyList}
-                  columns={columns}
-                  components={{ Toolbar: () => CustomToolbar({ selectedRowIds, fetchdata }) }}
-                  checkboxSelection
-                  onRowSelectionModelChange={handleSelectionChange}
-                  rowSelectionModel={selectedRowIds}
-                  getRowId={row => row._id}
-
-                />
-              </Card>
-            </Box>
-          </TableStyle>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
+          <Typography variant="h4" >
+            Policy
+          </Typography>
+          <Button variant="contained" startIcon={<Icon icon="eva:plus-fill" />} onClick={handleOpenAdd}>
+            Add New Policy
+          </Button>
+        </Stack>
+        <TableStyle>
+          <Box width="100%">
+            <Card style={{ height: "600px", paddingTop: "5px" }}>
+              <DataGrid
+                rows={policyList}
+                columns={columns}
+                components={{ Toolbar: () => CustomToolbar({ selectedRowIds, fetchdata }) }}
+                checkboxSelection
+                onRowSelectionModelChange={handleSelectionChange}
+                rowSelectionModel={selectedRowIds}
+                getRowId={row => row.id}
+              />
+            </Card>
+          </Box>
+        </TableStyle>
       </Container>
     </>
   );

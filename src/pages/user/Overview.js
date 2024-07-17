@@ -18,7 +18,7 @@ const Overview = ({ data }) => {
               </Grid>
               <Grid style={{ borderBottom: "1.5px dashed", borderBottomColor: Palette.grey[400] }} py={2}>
                 <Typography variant="body1">Email :</Typography>
-                <Typography variant="body2" color={Palette.grey[600]}>{data?.emailAddress ? data?.emailAddress : "---"}</Typography>
+                <Typography variant="body2" color={Palette.grey[600]}>{data?.email ? data?.email : "---"}</Typography>
               </Grid>
             </Grid>
             <Grid item xs={12} sm={6}>

@@ -203,17 +203,17 @@ const View = () => {
 
                 {/* Notes Table */}
                 <Card sx={{ marginTop: "50px" }}>
-                    <Notes toggleVisibilityNotes={toggleVisibilityNotes} isVisibleNotes={isVisibleNotes} rows={contactData?.notes} setUserAction={setUserAction} _id={params.id} />
+                    <Notes toggleVisibilityNotes={toggleVisibilityNotes} isVisibleNotes={isVisibleNotes} rows={contactData?.notes} setUserAction={setUserAction} _id={params.id} method={undefined} />
                 </Card>
 
                 {/* Task Table */}
                 <Card sx={{ marginTop: "20px" }}>
-                    <Task toggleVisibilityTask={toggleVisibilityEvent} isVisibleTask={isVisibleEvent} rows={contactData?.tasks} setUserAction={setUserAction} _id={params.id} />
+                    <Task toggleVisibilityTask={toggleVisibilityEvent} isVisibleTask={isVisibleEvent} rows={contactData?.tasks} setUserAction={setUserAction} _id={params.id} leadData={undefined} />
                 </Card>
 
                 {/* Meetings Table */}
                 <Card sx={{ marginTop: "20px" }}>
-                    <Meetings toggleVisibilityMeeting={toggleVisibilityMeeting} isVisibleMeetings={isVisibleMeetings} rows={contactData?.meetings} setUserAction={setUserAction} _id={params.id} data={contactData} />
+                    <Meetings toggleVisibilityMeeting={toggleVisibilityMeeting} isVisibleMeetings={isVisibleMeetings} rows={contactData?.meetings} setUserAction={setUserAction} _id={params.id} data={contactData} style={undefined} />
                 </Card>
 
                 {/* Calls Table */}

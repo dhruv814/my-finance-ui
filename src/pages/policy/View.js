@@ -67,19 +67,18 @@ const View = () => {
 
     // fetch api
     const fetchdata = async () => {
-        const result = await apiget(`policy/view/${params.id}`)
+        const result = await apiget(`policies/policy/${params.id}`)
         if (result && result.status === 200) {
-            setPolicyData(result?.data?.policy[0])
+            console.log(result.data)
+            setPolicyData(result?.data)
         }
     }
 
     // delete api
     const deletedata = async () => {
-        await apidelete(`policy/delete/${params.id}`)
+        await apidelete(`policy/${params.id}`)
         navigate('/dashboard/policy')
     }
-
-
 
     useEffect(() => {
         fetchdata();
@@ -191,11 +190,11 @@ const View = () => {
                         <Other data={policyData} />
                     </CustomTabPanel>
                 </Box>
-           
+
 
                 {/* Notes Table */}
                 <Card sx={{ marginTop: "50px" }}>
-                    <Notes toggleVisibilityNotes={toggleVisibilityNotes} isVisibleNotes={isVisibleNotes} rows={policyData?.notes} _id={params.id} setUserAction={setUserAction} />
+                    <Notes toggleVisibilityNotes={toggleVisibilityNotes} isVisibleNotes={isVisibleNotes} rows={policyData?.notes} _id={params.id} setUserAction={setUserAction} method={undefined} />
                 </Card>
 
                 {/* Claim Table */}

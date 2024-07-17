@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { DeleteOutline } from '@mui/icons-material';
 import TableStyle from '../../components/TableStyle';
-import Iconify from '../../components/iconify/Iconify';
 import { apiget, deleteManyApi } from '../../service/api';
 import DeleteModel from '../../components/Deletemodle'
+import { Icon } from '@iconify/react';
 
 function CustomToolbar({ selectedRowIds, fetchdata }) {
     const [opendelete, setOpendelete] = useState(false);
@@ -33,7 +33,7 @@ function CustomToolbar({ selectedRowIds, fetchdata }) {
             {selectedRowIds && selectedRowIds.length > 0 && <Button variant="text" sx={{ textTransform: 'capitalize' }} startIcon={<DeleteOutline />} onClick={handleOpenDelete}>Delete</Button>}
             <DeleteModel opendelete={opendelete} handleClosedelete={handleCloseDelete} deletedata={deleteManyEmailTemplate} id={selectedRowIds} />
         </GridToolbarContainer>
-    );
+    ); 
 }
 
 const EmailTemplate = () => {
@@ -124,7 +124,7 @@ const EmailTemplate = () => {
                         <Typography variant="h4">
                             Email Template List
                         </Typography>
-                        <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />} >
+                        <Button variant="contained" startIcon={<Icon icon="eva:plus-fill" />} >
                             <Link to="/dashboard/emailtemplate/add" style={{ textDecoration: "none", color: "white" }}>New Template</Link>
                         </Button>
                     </Stack>

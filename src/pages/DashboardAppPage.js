@@ -6,7 +6,6 @@ import { useTheme } from '@mui/material/styles';
 import { Grid, Container, Typography } from '@mui/material';
 // components
 import { useEffect, useState } from 'react';
-import Iconify from '../components/iconify';
 // sections
 import {
   AppTasks,
@@ -20,6 +19,8 @@ import {
   AppConversionRates,
 } from '../sections/@dashboard/app';
 import { apiget } from '../service/api';
+import React from 'react';
+import { Icon } from '@iconify/react';
 
 // ----------------------------------------------------------------------
 
@@ -35,7 +36,7 @@ export default function DashboardAppPage() {
 
   // lead api
   const fetchLead = async () => {
-    const result = await apiget(userRole === 'admin' ? `lead/list` : `lead/list/?createdBy=${userid}`)
+    const result = await apiget(userRole === 'admin' ? `lead/list` : `lead/list?createdBy=${userid}`)
     if (result && result.status === 200) {
       setTotalLead(result?.data?.total_recodes)
     }
@@ -43,7 +44,7 @@ export default function DashboardAppPage() {
 
   // contact api
   const fetchContact = async () => {
-    const result = await apiget(userRole === 'admin' ? `contact/list` : `contact/list/?createdBy=${userid}`)
+    const result = await apiget(userRole === 'admin' ? `contact/list` : `contact/list?createdBy=${userid}`)
     if (result && result.status === 200) {
       setTotalContact(result?.data?.total_recodes)
     }
@@ -51,7 +52,7 @@ export default function DashboardAppPage() {
 
   // contact api
   const fetchPolicy = async () => {
-    const result = await apiget(userRole === 'admin' ? `policy/list` : `policy/list/?createdBy=${userid}`)
+    const result = await apiget(userRole === 'admin' ? `policy/list` : `policy/list?createdBy=${userid}`)
     if (result && result.status === 200) {
       setTotalPolicy(result?.data?.total_recodes)
     }
@@ -59,7 +60,7 @@ export default function DashboardAppPage() {
 
   // contact api
   const fetchEvent = async () => {
-    const result = await apiget(userRole === 'admin' ? `task/list` : `task/list/?createdBy=${userid}`)
+    const result = await apiget(userRole === 'admin' ? `task/list` : `task/list?createdBy=${userid}`)
     if (result && result.status === 200) {
       setTotalEvent(result?.data?.total_recodes)
     }
@@ -74,7 +75,7 @@ export default function DashboardAppPage() {
   return (
     <>
       <Helmet>
-        {/* <title> Dashboard | Minimal UI </title> */}
+        <title> Dashboard | My Finance </title>
       </Helmet>
 
       <Container maxWidth="xl">
@@ -84,19 +85,19 @@ export default function DashboardAppPage() {
 
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={3}>
-            <AppWidgetSummary title="Mutual Funds" total={totalLead} icon={'ic:baseline-leaderboard'} />
+            <AppWidgetSummary title="Mutual Funds" total={totalLead} icon={'ic:baseline-leaderboard'} sx={undefined} />
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
-            <AppWidgetSummary title="Policies" total={totalPolicy} color="warning" icon={'ic:baseline-policy'} />
+            <AppWidgetSummary title="Policies" total={totalPolicy} color="warning" icon={'ic:baseline-policy'} sx={undefined} />
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
-            <AppWidgetSummary title="Contacts" total={totalContact} color="info" icon={'fluent:book-contacts-24-filled'} />
+            <AppWidgetSummary title="Contacts" total={totalContact} color="info" icon={'fluent:book-contacts-24-filled'} sx={undefined} />
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
-            <AppWidgetSummary title="Tasks" total={totalEvent} color="error" icon={'mdi:events'} />
+            <AppWidgetSummary title="Tasks" total={totalEvent} color="error" icon={'mdi:events'} sx={undefined} />
           </Grid>
 
           <Grid item xs={12} md={6} lg={8}>
@@ -153,8 +154,7 @@ export default function DashboardAppPage() {
                 theme.palette.info.main,
                 theme.palette.warning.main,
                 theme.palette.error.main,
-              ]}
-            />
+              ]} subheader={undefined} />
           </Grid>
 
           <Grid item xs={12} md={6} lg={8}>
@@ -185,8 +185,7 @@ export default function DashboardAppPage() {
                 { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
                 { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
               ]}
-              chartColors={[...Array(6)].map(() => theme.palette.text.secondary)}
-            />
+              chartColors={[...Array(6)].map(() => theme.palette.text.secondary)} subheader={undefined} />
           </Grid>
 
           <Grid item xs={12} md={6} lg={8}>
@@ -198,8 +197,7 @@ export default function DashboardAppPage() {
                 description: faker.name.jobTitle(),
                 image: `/assets/images/covers/cover_${index + 1}.jpg`,
                 postedAt: faker.date.recent(),
-              }))}
-            />
+              }))} subheader={undefined} />
           </Grid>
 
           <Grid item xs={12} md={6} lg={4}>
@@ -216,8 +214,7 @@ export default function DashboardAppPage() {
                 ][index],
                 type: `order${index + 1}`,
                 time: faker.date.past(),
-              }))}
-            />
+              }))} subheader={undefined} />
           </Grid>
 
           <Grid item xs={12} md={6} lg={4}>
@@ -227,25 +224,24 @@ export default function DashboardAppPage() {
                 {
                   name: 'FaceBook',
                   value: 323234,
-                  icon: <Iconify icon={'eva:facebook-fill'} color="#1877F2" width={32} />,
+                  icon: <Icon icon={'eva:facebook-fill'} color="#1877F2" width={32} />,
                 },
                 {
                   name: 'Google',
                   value: 341212,
-                  icon: <Iconify icon={'eva:google-fill'} color="#DF3E30" width={32} />,
+                  icon: <Icon icon={'eva:google-fill'} color="#DF3E30" width={32} />,
                 },
                 {
                   name: 'Linkedin',
                   value: 411213,
-                  icon: <Iconify icon={'eva:linkedin-fill'} color="#006097" width={32} />,
+                  icon: <Icon icon={'eva:linkedin-fill'} color="#006097" width={32} />,
                 },
                 {
                   name: 'Twitter',
                   value: 443232,
-                  icon: <Iconify icon={'eva:twitter-fill'} color="#1C9CEA" width={32} />,
+                  icon: <Icon icon={'eva:twitter-fill'} color="#1C9CEA" width={32} />,
                 },
-              ]}
-            />
+              ]} subheader={undefined} />
           </Grid>
 
           <Grid item xs={12} md={6} lg={8}>
@@ -257,8 +253,7 @@ export default function DashboardAppPage() {
                 { id: '3', label: 'Stakeholder Meeting' },
                 { id: '4', label: 'Scoping & Estimations' },
                 { id: '5', label: 'Sprint Showcase' },
-              ]}
-            />
+              ]} subheader={undefined} />
           </Grid>
         </Grid>
       </Container>

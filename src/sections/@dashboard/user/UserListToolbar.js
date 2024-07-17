@@ -1,10 +1,9 @@
 import PropTypes from 'prop-types';
+import React from 'react';
 // @mui
 import { styled, alpha } from '@mui/material/styles';
 import { Toolbar, Tooltip, IconButton, Typography, OutlinedInput, InputAdornment } from '@mui/material';
-// component
-import Iconify from '../../../components/iconify';
-
+import { Icon } from '@iconify/react';
 // ----------------------------------------------------------------------
 
 const StyledRoot = styled(Toolbar)(({ theme }) => ({
@@ -22,6 +21,7 @@ const StyledSearch = styled(OutlinedInput)(({ theme }) => ({
   }),
   '&.Mui-focused': {
     width: 320,
+    // @ts-ignore
     boxShadow: theme.customShadows.z8,
   },
   '& fieldset': {
@@ -59,7 +59,9 @@ export default function UserListToolbar({ numSelected, filterName, onFilterName 
           placeholder="Search user..."
           startAdornment={
             <InputAdornment position="start">
-              <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', width: 20, height: 20 }} />
+              <Icon icon="eva:search-fill" 
+              // @ts-ignore
+              sx={{ color: 'text.disabled', width: 20, height: 20 }} />
             </InputAdornment>
           }
         />
@@ -68,13 +70,13 @@ export default function UserListToolbar({ numSelected, filterName, onFilterName 
       {numSelected > 0 ? (
         <Tooltip title="Delete">
           <IconButton>
-            <Iconify icon="eva:trash-2-fill" />
+            <Icon icon="eva:trash-2-fill" />
           </IconButton>
         </Tooltip>
       ) : (
         <Tooltip title="Filter list">
           <IconButton>
-            <Iconify icon="ic:round-filter-list" />
+            <Icon icon="ic:round-filter-list" />
           </IconButton>
         </Tooltip>
       )}

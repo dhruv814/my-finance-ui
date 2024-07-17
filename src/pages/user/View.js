@@ -1,15 +1,14 @@
+// @ts-nocheck
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Box, Card, Container, Grid, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Container, Grid, Stack, Tab, Tabs } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
-import moment from 'moment/moment'
 import Actionbutton from '../../components/Actionbutton';
 import Header from '../../components/Header';
 import { apidelete, apiget } from '../../service/api';
 import AddUser from './Add'
 import EditUser from './Edit'
 import DeleteModel from '../../components/Deletemodle'
-import Palette from '../../theme/palette'
 import { CustomTabPanel, a11yProps } from '../../components/CustomTabPanel';
 import Overview from './Overview';
 import Other from './Other';
@@ -86,7 +85,7 @@ const View = () => {
                         />
                         <Stack direction="row" alignItems="center" justifyContent={"flex-end"} spacing={2}>
                             {/* Action Butoon */}
-                            {userdata.role === "admin" ?
+                            {userdata.role === "ADMIN" ?
                                 <Actionbutton
                                     handleOpen={handleOpenAdd}
                                     handleOpenEdit={handleOpenEdit}

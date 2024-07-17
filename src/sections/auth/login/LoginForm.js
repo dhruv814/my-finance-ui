@@ -9,7 +9,8 @@ import * as yup from "yup";
 
 import CircularProgress from '@mui/material/CircularProgress';
 import { apipost } from '../../../service/api';
-import Iconify from '../../../components/iconify';
+import React from 'react';
+import { Icon } from '@iconify/react';
 // ----------------------------------------------------------------------
 
 export default function LoginForm() {
@@ -91,7 +92,7 @@ export default function LoginForm() {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                    <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
+                    <Icon icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
                   </IconButton>
                 </InputAdornment>
               ),

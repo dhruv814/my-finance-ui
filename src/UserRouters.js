@@ -25,6 +25,7 @@ import TaskView from './pages/task/View'
 import EmailTemplate from './pages/emailTemplate/EmailTemplate';
 import AddEmailTemplate from './pages/emailTemplate/Add'
 import ViewEmailTemplate from './pages/emailTemplate/View'
+import React from 'react';
 // ----------------------------------------------------------------------
 
 export default function Router() {

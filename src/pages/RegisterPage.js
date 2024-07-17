@@ -1,16 +1,15 @@
 import { Helmet } from 'react-helmet-async';
 // @mui
 import { styled } from '@mui/material/styles';
-import {Container, Typography, Divider, Stack, Button } from '@mui/material';
+import { Avatar, Box, Container, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
+import AppRegistrationOutlined from '@mui/icons-material/AppRegistrationOutlined';
 // hooks
 import useResponsive from '../hooks/useResponsive';
-// components
-import Logo from '../components/logo';
-import Iconify from '../components/iconify';
 // sections
-import { LoginForm } from '../sections/auth/login';
 import { RegisterForm } from '../sections/auth/register';
+import React from 'react';
+
 // ----------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -25,8 +24,9 @@ const StyledSection = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
+  // @ts-ignore
   boxShadow: theme.customShadows.card,
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: theme.palette.common.white,
 }));
 
 const StyledContent = styled('div')(({ theme }) => ({
@@ -36,7 +36,7 @@ const StyledContent = styled('div')(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
   flexDirection: 'column',
-  padding: theme.spacing(12, 0),
+  padding: theme.spacing(0, 0)
 }));
 
 // ----------------------------------------------------------------------
@@ -47,17 +47,18 @@ export default function RegisterPage() {
   return (
     <>
       <Helmet>
-        <title> Login | Minimal UI </title>
+        <title> Register | My Finance </title>
       </Helmet>
 
       <StyledRoot>
-        <Logo
+        {/* <Logo
+          // @ts-ignore
           sx={{
             position: 'fixed',
             top: { xs: 16, sm: 24, md: 40 },
             left: { xs: 16, sm: 24, md: 40 },
           }}
-        />
+        /> */}
 
         {mdUp && (
           <StyledSection>
@@ -67,35 +68,25 @@ export default function RegisterPage() {
 
         <Container maxWidth="sm">
           <StyledContent>
-            <Typography variant="h4" gutterBottom>
-              Sign up to Minimal
-            </Typography>
-
-            <Typography variant="body2" sx={{ mb: 5 }}>
-              Do have an account? 
-              <Link to="/login">Sign In</Link>
-            </Typography>
-
-            {/* <Stack direction="row" spacing={2}>
-              <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
-              </Button>
-
-              <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:facebook-fill" color="#1877F2" width={22} height={22} />
-              </Button>
-
-              <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:twitter-fill" color="#1C9CEA" width={22} height={22} />
-              </Button>
-            </Stack>
-
-            <Divider sx={{ my: 3 }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                OR
+            <Box
+              sx={{
+                mx: 4,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
+            >
+              <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                <AppRegistrationOutlined />
+              </Avatar>
+              <Typography variant="h4" gutterBottom>
+                Sign up
               </Typography>
-            </Divider> */}
-
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Do have an account? {' '}
+                <Link to="/login">Sign In</Link>
+              </Typography>
+            </Box>
             <RegisterForm />
           </StyledContent>
         </Container>

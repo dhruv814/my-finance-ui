@@ -1,5 +1,7 @@
+// @ts-nocheck
 /* eslint-disable react/prop-types */
 import * as React from 'react';
+import { useState } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import { FormControl, FormHelperText, FormLabel, Grid, MenuItem, Select, TextField } from '@mui/material';
@@ -13,76 +15,95 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { useFormik } from 'formik';
 import * as yup from "yup";
 import { toast } from 'react-toastify';
-import { useEffect, useState } from 'react';
-
-import { apiget, apipost } from '../../service/api';
+import { apipost } from '../../service/api';
 import Palette from '../../theme/palette';
+import AutocompleteDropdown from '../../components/AutocompleteDropdown';
+
 
 const Add = (props) => {
     const { open, handleClose, setUserAction, _id } = props
-
-    const [contactList, setContactList] = useState([])
     const userid = localStorage.getItem('user_id')
-    const userRole = localStorage.getItem("userRole")
+
 
     // -----------  validationSchema
     const validationSchema = yup.object({
+        policyInsurerName: yup.string().required("Policy Insurer Name is required"),
+        policyName: yup.string().required("Policy Name is required"),
         policyType: yup.string().required("Policy Type is required"),
+        policyNumber: yup.string().required("Policy Number is required"),
         policyStartDate: yup.date().required("Policy Start Date is required"),
         policyEndDate: yup.date().required("Policy End Date is required"),
         policyStatus: yup.string().required("Policy Status is required"),
-        coverageAmounts: yup.number().required("Coverage Amounts is required"),
-        deductibles: yup.number().required("Deductions is required"),
-        limits: yup.number().required("Limits is required"),
-        insuredPersonName: yup.string().required("Person Name is required"),
+        policyTerm: yup.number().required("Policy Term is required"),
+        baseSumAssured: yup.number().required("Base Sum Assured is required"),
+
+        insuredPersonName: yup.string().required("Insured Person Name is required"),
         insuredPersonDateOfBirth: yup.date().required("Date of Birth is required"),
         relationshipToTheInsured: yup.string().required("Relationship To The Insured is required"),
         phoneNumber: yup.string().matches(/^[0-9]{10}$/, 'Phone number is invalid').required('Phone number is required'),
         emailAddress: yup.string().email('Invalid email').required("Email is required"),
-        additionalPhoneNumber: yup.string().matches(/^[0-9]{10}$/, 'Phone number is invalid'),
-        additionalEmailAddress: yup.string().email('Invalid email'),
-        underwriterPhone: yup.string().matches(/^[0-9]{10}$/, 'Phone number is invalid'),
-        underwriterEmail: yup.string().email('Invalid email')
     });
 
     // -----------   initialValues
     const initialValues = {
+
+        // policy details
+        policyInsurerName: "",
+        policyName: "",
         policyType: "",
+        policyNumber: "",
         policyStartDate: "",
         policyEndDate: "",
         policyStatus: "",
-        coverageAmounts: "",
-        deductibles: "",
-        limits: "",
+        policyTerm: "",
+
+        // life assured details
         insuredPersonName: "",
         insuredPersonDateOfBirth: "",
         phoneNumber: "",
         emailAddress: "",
-        instagramProfile: "",
-        twitterProfile: "",
         relationshipToTheInsured: "",
-        additionalInsuredPersonName: "",
-        additionalInsuredDateOfBirth: "",
-        additionalRelationshipToTheInsured: "",
-        additionalPhoneNumber: "",
-        additionalEmailAddress: "",
-        additionalInstagramProfile: "",
-        additionalTwitterProfile: "",
+
+        // premium details 
         premiumAmount: "",
-        FrequencyOfPremiumPayments: "",
-        underwriterName: "",
-        underwriterPhone: "",
-        underwriterEmail: "",
-        underwriterDecisions: "",
+        premiumPaymentTerms: "",
+        premiumFrequency: "",
+        baseSumAssured: "",
+        premiumDueDate: "",
+        fundValue: "",
+
+        // policy holder detail
         createdBy: userid,
-        contact_id: _id,
-        assigned_agent: userid
+        contact_id: _id
     };
+
+    const [selectedValue, setSelectedValue] = useState(null);
+
+    const [insurerList, setOptions] = useState([
+        { value: 'Max Life', label: 'Max Life' },
+        { value: 'Future Generali Life', label: 'Future Generali Life' },
+        { value: 'SBI Life', label: 'SBI Life' },
+        { value: 'HDFC Life', label: 'HDFC Life' },
+        { value: 'Aviva Life', label: 'Aviva Life' },
+        { value: 'ShriRam Life', label: 'ShriRam Life' },
+        { value: 'ICICI Pru Life', label: 'ICICI Pru Life' },
+        { value: 'Aditya Birla Sun Life', label: 'Aditya Birla Sun Life' },
+        { value: 'Tata AIA Life', label: 'Tata AIA Life' },
+        { value: 'Edlwise Life', label: 'Edlwise Life' },
+        { value: 'Reliance Life', label: 'Reliance Life' },
+    ]);
+
+    const handleOptionsChange = (newOptions) => {
+        setOptions(newOptions);
+        console.log(newOptions)
+    };
+
 
     // add policy api
     const addPolicy = async (values) => {
         const data = values
-        const result = await apipost('policy/add', data)
+        console.log(data)
+        const result = await apipost('policies/policy', data)
 
         setUserAction(result)
 
@@ -90,6 +111,8 @@ const Add = (props) => {
             toast.success(result.data.message)
             formik.resetForm();
             handleClose();
+        } else {
+            toast.error("Something went wrong. Please try again!!")
         }
     }
 
@@ -102,20 +125,13 @@ const Add = (props) => {
         },
     });
 
-    const fetchdata = async () => {
-        const result = await apiget(userRole === 'admin' ? `contact/list` : `contact/list/?createdBy=${userid}`)
-        if (result && result.status === 200) {
-            setContactList(result?.data?.result)
-        }
-    }
-    useEffect(() => {
-        fetchdata();
-    }, [])
     return (
         <div>
             <Dialog
                 open={open}
                 onClose={handleClose}
+                fullWidth={true}
+                maxWidth="md"
                 aria-labelledby="scroll-dialog-title"
                 aria-describedby="scroll-dialog-description"
             >
@@ -124,11 +140,11 @@ const Add = (props) => {
                     style={{
                         display: "flex",
                         justifyContent: "space-between",
-                        // backgroundColor: "#2b4054",
-                        // color: "white",
+                        //backgroundColor: "#2b4054",
+                        //color: "white",
                     }}
                 >
-                    <Typography variant="h6">Add New </Typography>
+                    <Typography variant="h6">Add New</Typography>
                     <Typography>
                         <ClearIcon
                             onClick={handleClose}
@@ -150,9 +166,79 @@ const Add = (props) => {
                                 rowSpacing={3}
                                 columnSpacing={{ xs: 0, sm: 5, md: 4 }}
                             >
+
+                                {/* Policy Insurer Name */}
                                 <Grid item xs={12} sm={6} md={6}>
+                                    <FormLabel>Policy Insurer Name</FormLabel>
+                                    {/* <FilterableDropdown
+                                        id="policyInsurerName"
+                                        selectedValue={selectedValue}
+                                        placeholder="Select insurer name"
+                                        options={insurerList}
+                                        onValueChange={(selectedOption) => { if (!!selectedOption) { formik.values.policyInsurerName = selectedOption.value; } handleValueChange(selectedOption) }}
+                                        onOptionsChange={handleOptionsChange}
+                                        error={formik.touched.policyInsurerName && Boolean(formik.errors.policyInsurerName)}
+                                        helperText={formik.touched.policyInsurerName && formik.errors.policyInsurerName}
+                                    /> */}
+                                    <AutocompleteDropdown
+                                        options={insurerList}
+                                        selectedValue={selectedValue}
+                                        setSelectedValue={(selectedOption) => {
+                                            if (!!selectedOption) {
+                                                formik.values.policyInsurerName = selectedOption.value;
+                                            } else {
+                                                formik.values.policyInsurerName = null;
+                                            }
+                                            setSelectedValue(selectedOption);
+                                        }}
+                                        onOptionsChange={handleOptionsChange}
+                                        placeholder="Select insurer name"
+                                        error={formik.touched.policyInsurerName && Boolean(formik.errors.policyInsurerName)}
+                                        helpertext={formik.touched.policyInsurerName && formik.errors.policyInsurerName}
+                                    />
+                                    {/* <TextField
+                                        id="policyInsurerName"
+                                        name="policyInsurerName"
+                                        size='small'
+                                        fullWidth
+                                        value={formik.values.policyInsurerName}
+                                        onChange={formik.handleChange}
+                                        error={formik.touched.policyInsurerName && Boolean(formik.errors.policyInsurerName)}
+                                        helperText={formik.touched.policyInsurerName && formik.errors.policyInsurerName}
+                                    /> */}
+                                </Grid>
+                                {/* Policy Name */}
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <FormLabel>Policy Name</FormLabel>
+                                    <TextField
+                                        id="policyName"
+                                        name="policyName"
+                                        size='small'
+                                        fullWidth
+                                        value={formik.values.policyName}
+                                        onChange={formik.handleChange}
+                                        error={formik.touched.policyName && Boolean(formik.errors.policyName)}
+                                        helperText={formik.touched.policyName && formik.errors.policyName}
+                                    />
+                                </Grid>
+                                {/* Policy Number */}
+                                <Grid item xs={12} sm={4} md={4}>
+                                    <FormLabel>Policy Number</FormLabel>
+                                    <TextField
+                                        id="policyNumber"
+                                        name="policyNumber"
+                                        size='small'
+                                        fullWidth
+                                        value={formik.values.policyNumber}
+                                        onChange={formik.handleChange}
+                                        error={formik.touched.policyNumber && Boolean(formik.errors.policyNumber)}
+                                        helperText={formik.touched.policyNumber && formik.errors.policyNumber}
+                                    />
+                                </Grid>
+                                {/* Policy Type */}
+                                <Grid item xs={12} sm={4} md={4}>
                                     <FormControl fullWidth>
-                                        <FormLabel>Policy type</FormLabel>
+                                        <FormLabel>Policy Type</FormLabel>
                                         <Select
                                             labelId="demo-simple-select-label"
                                             id="policyType"
@@ -177,35 +263,10 @@ const Add = (props) => {
                                         <FormHelperText style={{ color: Palette.error.main }}>{formik.touched.policyType && formik.errors.policyType}</FormHelperText>
                                     </FormControl>
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Policy Start Date</FormLabel>
-                                    <TextField
-                                        name='policyStartDate'
-                                        type='date'
-                                        size='small'
-                                        fullWidth
-                                        value={formik.values.policyStartDate}
-                                        onChange={formik.handleChange}
-                                        error={formik.touched.policyStartDate && Boolean(formik.errors.policyStartDate)}
-                                        helperText={formik.touched.policyStartDate && formik.errors.policyStartDate}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Policy End Date</FormLabel>
-                                    <TextField
-                                        name='policyEndDate'
-                                        type='date'
-                                        size='small'
-                                        fullWidth
-                                        value={formik.values.policyEndDate}
-                                        onChange={formik.handleChange}
-                                        error={formik.touched.policyEndDate && Boolean(formik.errors.policyEndDate)}
-                                        helperText={formik.touched.policyEndDate && formik.errors.policyEndDate}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
+                                {/* Policy Status */}
+                                <Grid item xs={12} sm={4} md={4}>
                                     <FormControl fullWidth>
-                                        <FormLabel>Policy status</FormLabel>
+                                        <FormLabel>Policy Status</FormLabel>
                                         <Select
                                             labelId="demo-simple-select-label"
                                             id="policyStatus"
@@ -218,83 +279,64 @@ const Add = (props) => {
                                                 formik.touched.policyStatus &&
                                                 Boolean(formik.errors.policyStatus)
                                             }
+                                            // @ts-ignore
                                             helperText={
                                                 formik.touched.policyStatus && formik.errors.policyStatus
                                             }
                                         >
-                                            <MenuItem value="Active">Active</MenuItem>
-                                            <MenuItem value="InActive">InActive </MenuItem>
-                                            <MenuItem value="Canceled">Canceled </MenuItem>
+                                            <MenuItem value="ACTIVE">Active</MenuItem>
+                                            <MenuItem value="INACTIVE">InActive </MenuItem>
+                                            <MenuItem value="CANCELED">Canceled </MenuItem>
+                                            <MenuItem value="LAPSED">Lapsed </MenuItem>
                                         </Select>
                                         <FormHelperText style={{ color: Palette.error.main }}>{formik.touched.policyStatus && formik.errors.policyStatus}</FormHelperText>
                                     </FormControl>
                                 </Grid>
-                            </Grid>
-                            <Typography
-                                style={{ marginBottom: "15px", marginTop: "15px" }}
-                                variant="h6"
-                            >
-                                Policy Coverage Details
-                            </Typography>
-                            <Grid
-                                container
-                                rowSpacing={3}
-                                columnSpacing={{ xs: 0, sm: 5, md: 4 }}
-                            >
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Coverage Amounts</FormLabel>
+                                {/* Policy Start Date */}
+                                <Grid item xs={12} sm={4} md={4}>
+                                    <FormLabel>Policy Start Date</FormLabel>
                                     <TextField
-                                        id="coverageAmounts"
-                                        name="coverageAmounts"
+                                        name='policyStartDate'
+                                        type='date'
                                         size='small'
-                                        type='number'
                                         fullWidth
-                                        value={formik.values.coverageAmounts}
+                                        value={formik.values.policyStartDate}
                                         onChange={formik.handleChange}
-                                        error={
-                                            formik.touched.coverageAmounts &&
-                                            Boolean(formik.errors.coverageAmounts)
-                                        }
-                                        helperText={
-                                            formik.touched.coverageAmounts && formik.errors.coverageAmounts
-                                        }
+                                        error={formik.touched.policyStartDate && Boolean(formik.errors.policyStartDate)}
+                                        helperText={formik.touched.policyStartDate && formik.errors.policyStartDate}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Deductibles</FormLabel>
+                                {/* Policy End Date */}
+                                <Grid item xs={12} sm={4} md={4}>
+                                    <FormLabel>Policy End Date</FormLabel>
                                     <TextField
-                                        id="deductibles"
-                                        name="deductibles"
+                                        name='policyEndDate'
+                                        type='date'
                                         size='small'
-                                        type='number'
                                         fullWidth
-                                        value={formik.values.deductibles}
+                                        value={formik.values.policyEndDate}
                                         onChange={formik.handleChange}
-                                        error={
-                                            formik.touched.deductibles &&
-                                            Boolean(formik.errors.deductibles)
-                                        }
-                                        helperText={
-                                            formik.touched.deductibles && formik.errors.deductibles
-                                        }
+                                        error={formik.touched.policyEndDate && Boolean(formik.errors.policyEndDate)}
+                                        helperText={formik.touched.policyEndDate && formik.errors.policyEndDate}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={12}>
-                                    <FormLabel>Limits</FormLabel>
+                                {/* Policy Term */}
+                                <Grid item xs={12} sm={4} md={4}>
+                                    <FormLabel>Policy Term</FormLabel>
                                     <TextField
-                                        id="limits"
-                                        name="limits"
+                                        id="policyTerm"
+                                        name="policyTerm"
                                         size='small'
                                         type='number'
                                         fullWidth
-                                        value={formik.values.limits}
+                                        value={formik.values.policyTerm}
                                         onChange={formik.handleChange}
                                         error={
-                                            formik.touched.limits &&
-                                            Boolean(formik.errors.limits)
+                                            formik.touched.policyTerm &&
+                                            Boolean(formik.errors.policyTerm)
                                         }
                                         helperText={
-                                            formik.touched.limits && formik.errors.limits
+                                            formik.touched.policyTerm && formik.errors.policyTerm
                                         }
                                     />
                                 </Grid>
@@ -303,7 +345,7 @@ const Add = (props) => {
                                 style={{ marginBottom: "15px", marginTop: "15px" }}
                                 variant="h6"
                             >
-                                Insured Details
+                                Life Insured Details
                             </Typography>
                             <Grid
                                 container
@@ -311,7 +353,7 @@ const Add = (props) => {
                                 columnSpacing={{ xs: 0, sm: 5, md: 4 }}
                             >
                                 <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Person Name</FormLabel>
+                                    <FormLabel>Insured Person Name</FormLabel>
                                     <TextField
                                         name='insuredPersonName'
                                         size='small'
@@ -335,33 +377,7 @@ const Add = (props) => {
                                         helperText={formik.touched.insuredPersonDateOfBirth && formik.errors.insuredPersonDateOfBirth}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={12}>
-                                    <FormLabel>Relationship to the insured</FormLabel>
-                                    <TextField
-                                        id="relationshipToTheInsured"
-                                        name="relationshipToTheInsured"
-                                        size='small'
-                                        fullWidth
-                                        value={formik.values.relationshipToTheInsured}
-                                        onChange={formik.handleChange}
-                                        error={formik.touched.relationshipToTheInsured && Boolean(formik.errors.relationshipToTheInsured)}
-                                        helperText={formik.touched.relationshipToTheInsured && formik.errors.relationshipToTheInsured}
-                                    />
-                                </Grid>
-
-                            </Grid>
-                            <Typography
-                                style={{ marginBottom: "15px", marginTop: "15px" }}
-                                variant="h6"
-                            >
-                                Insured person's contact information
-                            </Typography>
-                            <Grid
-                                container
-                                rowSpacing={3}
-                                columnSpacing={{ xs: 0, sm: 5, md: 4 }}
-                            >
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid item xs={12} sm={4} md={4}>
                                     <FormLabel>Phone Number</FormLabel>
                                     <TextField
                                         id=""
@@ -375,7 +391,7 @@ const Add = (props) => {
                                         helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid item xs={12} sm={4} md={4}>
                                     <FormLabel>Email</FormLabel>
                                     <TextField
                                         id="emailAddress"
@@ -389,156 +405,33 @@ const Add = (props) => {
                                         helperText={formik.touched.emailAddress && formik.errors.emailAddress}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Instagram Profile</FormLabel>
-                                    <TextField
-                                        id="instagramProfile"
-                                        name="instagramProfile"
-                                        type=""
-                                        size='small'
-                                        fullWidth
-                                        onChange={(e) => formik.setFieldValue('instagramProfile', `${e.target.value}`)}
-                                    />
-                                    {formik.values.instagramProfile && <a href={`https://www.instagram.com/${formik.values.instagramProfile}`} target="_blank" rel="noreferrer">Link</a>}
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Twitter profile</FormLabel>
-                                    <TextField
-                                        id="twitterProfile"
-                                        name="twitterProfile"
-                                        type=""
-                                        size='small'
-                                        fullWidth
-                                        onChange={(e) => formik.setFieldValue('twitterProfile', `${e.target.value}`)}
-                                    />
-                                    {formik.values.twitterProfile && <a href={`https://twitter.com/${formik.values.twitterProfile}`} target="_blank" rel="noreferrer">Link</a>}
-                                </Grid>
-                            </Grid>
-                            <Typography
-                                style={{ marginBottom: "15px", marginTop: "15px" }}
-                                variant="h6"
-                            >
-                                Additional Insured
-                            </Typography>
-                            <Grid
-                                container
-                                rowSpacing={3}
-                                columnSpacing={{ xs: 0, sm: 5, md: 4 }}
-                            >
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Person Name</FormLabel>
-                                    <TextField
-                                        id="additionalInsuredPersonName"
-                                        name="additionalInsuredPersonName"
-                                        size='small'
-                                        fullWidth
-                                        value={formik.values.additionalInsuredPersonName}
-                                        onChange={formik.handleChange}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Date Of Birth</FormLabel>
-                                    <TextField
-                                        name='additionalInsuredDateOfBirth'
-                                        type='date'
-                                        size='small'
-                                        fullWidth
-                                        value={formik.values.additionalInsuredDateOfBirth}
-                                        onChange={formik.handleChange}
-                                        error={formik.touched.additionalInsuredDateOfBirth && Boolean(formik.errors.additionalInsuredDateOfBirth)}
-                                        helperText={formik.touched.additionalInsuredDateOfBirth && formik.errors.additionalInsuredDateOfBirth}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} sm={12} md={12}>
+                                <Grid item xs={12} sm={4} md={4}>
                                     <FormLabel>Relationship to the insured</FormLabel>
                                     <TextField
-                                        id="additionalRelationshipToTheInsured"
-                                        name="additionalRelationshipToTheInsured"
+                                        id="relationshipToTheInsured"
+                                        name="relationshipToTheInsured"
                                         size='small'
                                         fullWidth
-                                        value={formik.values.additionalRelationshipToTheInsured}
+                                        value={formik.values.relationshipToTheInsured}
                                         onChange={formik.handleChange}
+                                        error={formik.touched.relationshipToTheInsured && Boolean(formik.errors.relationshipToTheInsured)}
+                                        helperText={formik.touched.relationshipToTheInsured && formik.errors.relationshipToTheInsured}
                                     />
-                                </Grid>
-
-                            </Grid>
-                            <Typography
-                                style={{ marginBottom: "15px", marginTop: "15px" }}
-                                variant="h6"
-                            >
-                                Additional insured person's contact information
-                            </Typography>
-                            <Grid
-                                container
-                                rowSpacing={3}
-                                columnSpacing={{ xs: 0, sm: 5, md: 4 }}
-                            >
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Phone Number</FormLabel>
-                                    <TextField
-                                        id="additionalPhoneNumber"
-                                        name="additionalPhoneNumber"
-                                        type="number"
-                                        size='small'
-                                        fullWidth
-                                        value={formik.values.additionalPhoneNumber}
-                                        onChange={formik.handleChange}
-                                        error={formik.touched.additionalPhoneNumber && Boolean(formik.errors.additionalPhoneNumber)}
-                                        helperText={formik.touched.additionalPhoneNumber && formik.errors.additionalPhoneNumber}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Email</FormLabel>
-                                    <TextField
-                                        id="additionalEmailAddress"
-                                        name="additionalEmailAddress"
-                                        type="email"
-                                        size='small'
-                                        fullWidth
-                                        value={formik.values.additionalEmailAddress}
-                                        onChange={formik.handleChange}
-                                        error={formik.touched.additionalEmailAddress && Boolean(formik.errors.additionalEmailAddress)}
-                                        helperText={formik.touched.additionalEmailAddress && formik.errors.additionalEmailAddress}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Instagram profile</FormLabel>
-                                    <TextField
-                                        id="additionalInstagramProfile"
-                                        name="additionalInstagramProfile"
-                                        type=""
-                                        size='small'
-                                        fullWidth
-                                        onChange={(e) => formik.setFieldValue('additionalInstagramProfile', `${e.target.value}`)}
-                                    />
-                                    {formik.values.additionalInstagramProfile && <a href={`https://www.instagram.com/${formik.values.additionalInstagramProfile}`} target="_blank" rel="noreferrer">Link</a>}
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Twitter profile</FormLabel>
-                                    <TextField
-                                        id="additionalTwitterProfile"
-                                        name="additionalTwitterProfile"
-                                        type=""
-                                        size='small'
-                                        fullWidth
-                                        onChange={(e) => formik.setFieldValue('additionalTwitterProfile', `${e.target.value}`)}
-                                    />
-                                    {formik.values.additionalTwitterProfile && <a href={`https://twitter.com/${formik.values.additionalTwitterProfile}`} target="_blank" rel="noreferrer">Link</a>}
                                 </Grid>
                             </Grid>
                             <Typography
                                 style={{ marginBottom: "15px", marginTop: "15px" }}
                                 variant="h6"
                             >
-                                Policy Premiums and Payments
+                                Premium Details
                             </Typography>
                             <Grid
                                 container
                                 rowSpacing={3}
                                 columnSpacing={{ xs: 0, sm: 5, md: 4 }}
+                                marginBottom="2%"
                             >
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid item xs={12} sm={4} md={4}>
                                     <FormLabel>Premium Amount</FormLabel>
                                     <TextField
                                         id="premiumAmount"
@@ -548,96 +441,76 @@ const Add = (props) => {
                                         fullWidth
                                         value={formik.values.premiumAmount}
                                         onChange={formik.handleChange}
-
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid item xs={12} sm={4} md={4}>
+                                    <FormLabel>Premium Payment Terms</FormLabel>
+                                    <TextField
+                                        id="premiumPaymentTerms"
+                                        name="premiumPaymentTerms"
+                                        type="number"
+                                        size='small'
+                                        fullWidth
+                                        value={formik.values.premiumPaymentTerms}
+                                        onChange={formik.handleChange}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={4} md={4}>
                                     <FormControl fullWidth>
-                                        <FormLabel>Premium Payments</FormLabel>
+                                        <FormLabel>Premium Frequency</FormLabel>
                                         <Select
                                             labelId="demo-simple-select-label"
-                                            id="FrequencyOfPremiumPayments"
-                                            name="FrequencyOfPremiumPayments"
+                                            id="premiumFrequency"
+                                            name="premiumFrequency"
                                             label=""
                                             size='small'
-                                            value={formik.values.FrequencyOfPremiumPayments}
+                                            value={formik.values.premiumFrequency}
                                             onChange={formik.handleChange}
                                         >
                                             <MenuItem value="Monthly">Monthly</MenuItem>
                                             <MenuItem value="Annually">Annually </MenuItem>
+                                            <MenuItem value="Single">Single Premium </MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Grid>
-                            </Grid>
-                            <Typography
-                                style={{ marginBottom: "15px", marginTop: "15px" }}
-                                variant="h6"
-                            >
-                                Underwriting Information
-                            </Typography>
-                            <Grid
-                                container
-                                rowSpacing={3}
-                                columnSpacing={{ xs: 0, sm: 5, md: 4 }}
-                            >
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Name</FormLabel>
+                                <Grid item xs={12} sm={4} md={4}>
+                                    <FormLabel>Base Sum Assured</FormLabel>
                                     <TextField
-                                        id=""
-                                        name="underwriterName"
-                                        type=""
-                                        fullWidth
-                                        size='small'
-                                        value={formik.values.underwriterName}
-                                        onChange={formik.handleChange}
-
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Phone Number</FormLabel>
-                                    <TextField
-                                        id=""
-                                        name="underwriterPhone"
+                                        id="baseSumAssured"
+                                        name="baseSumAssured"
                                         type="number"
-                                        fullWidth
                                         size='small'
-                                        value={formik.values.underwriterPhone}
+                                        fullWidth
+                                        value={formik.values.baseSumAssured}
                                         onChange={formik.handleChange}
-                                        error={formik.touched.underwriterPhone && Boolean(formik.errors.underwriterPhone)}
-                                        helperText={formik.touched.underwriterPhone && formik.errors.underwriterPhone}
+                                        error={formik.touched.baseSumAssured && Boolean(formik.errors.baseSumAssured)}
+                                        helperText={formik.touched.baseSumAssured && formik.errors.baseSumAssured}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormLabel>Email</FormLabel>
+                                <Grid item xs={12} sm={4} md={4}>
+                                    <FormLabel>Next Premium Due Date</FormLabel>
                                     <TextField
-                                        id=""
-                                        name="underwriterEmail"
-                                        type=""
-                                        fullWidth
+                                        name='premiumDueDate'
+                                        type='date'
                                         size='small'
-                                        value={formik.values.underwriterEmail}
+                                        fullWidth
+                                        value={formik.values.premiumDueDate}
                                         onChange={formik.handleChange}
-                                        error={formik.touched.underwriterEmail && Boolean(formik.errors.underwriterEmail)}
-                                        helperText={formik.touched.underwriterEmail && formik.errors.underwriterEmail}
+                                        error={formik.touched.premiumDueDate && Boolean(formik.errors.premiumDueDate)}
+                                        helperText={formik.touched.premiumDueDate && formik.errors.premiumDueDate}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <FormControl fullWidth>
-                                        <FormLabel>Underwriter Remarks</FormLabel>
-                                        <Select
-                                            labelId="demo-simple-select-label"
-                                            id="underwriterDecisions"
-                                            name="underwriterDecisions"
-                                            label=""
-                                            size='small'
-                                            value={formik.values.underwriterDecisions}
-                                            onChange={formik.handleChange}
-                                        >
-                                            <MenuItem value="Policyholder has a clean driving record">Policyholder has a clean driving record</MenuItem>
-                                            <MenuItem value="Policyholder's property located in a low-risk area">Policyholder's property located in a low-risk area </MenuItem>
-                                            <MenuItem value="Underwriter consulted with the claims department to assess potential risks.">Underwriter consulted with the claims department to assess potential risks. </MenuItem>
-                                        </Select>
-                                    </FormControl>
+                                <Grid item xs={12} sm={4} md={4}>
+                                    <FormLabel>Fund/Surrender Value</FormLabel>
+                                    <TextField
+                                        id="fundValue"
+                                        name="fundValue"
+                                        type="number"
+                                        size='small'
+                                        fullWidth
+                                        value={formik.values.fundValue}
+                                        onChange={formik.handleChange}
+                                    />
                                 </Grid>
                             </Grid>
 
@@ -645,14 +518,16 @@ const Add = (props) => {
                     </form>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={formik.handleSubmit} variant='contained' color='primary'>Save</Button>
+                    <Button onClick={formik.handleSubmit}
+                        variant="contained"
+                        color="primary">Save</Button>
                     <Button onClick={() => {
                         formik.resetForm()
                         handleClose()
-                    }} variant='outlined' color='error'>Cancle</Button>
+                    }} variant="outlined" color="error">Cancel</Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </div >
     );
 }
 
